@@ -1,4 +1,4 @@
-﻿#include "LCD_Test.h"
+#include "LCD_Test.h"
 #include "LCD_1in28.h"
 #include <stdio.h>
 #include "pico/stdlib.h"
@@ -10,7 +10,7 @@ int main(void)
         return -1;
     }
     
-    printf("LCD 1.28 Hello World Demo\r\n");
+    printf("LCD 1.28 Circle Demo\r\n");
     
     // Initialize LCD and clear with white background
     LCD_1IN28_Init(HORIZONTAL);
@@ -33,8 +33,13 @@ int main(void)
     Paint_Clear(WHITE);
     Paint_SetRotate(ROTATE_0);
     
-    // Draw Hello World text
-    Paint_DrawString_EN(40, 100, "Hello World!", &Font20, BLACK, WHITE);
+    // Calculate center point and radius
+    uint16_t centerX = LCD_1IN28.WIDTH / 2;
+    uint16_t centerY = LCD_1IN28.HEIGHT / 2;
+    uint16_t radius = 60;  // You can adjust this value to change circle size
+    
+    // Draw filled black circle in the center
+    Paint_DrawCircle(centerX, centerY, radius, BLACK, DOT_PIXEL_1X1, DRAW_FILL_FULL);
     
     // Display the image
     LCD_1IN28_Display(imageBuffer);
