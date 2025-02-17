@@ -19,9 +19,14 @@
 // RGB565 color conversion macro
 #define RGB_(r, g, b) ((((r) & 0xF8) << 8) | (((g) & 0xFC) << 3) | ((b) >> 3))
 
-#define MINECRAFT_BLUE   RGB_(51, 51, 255)    // The blue color used for the rotating arcs
-#define MINECRAFT_YELLOW RGB_(255, 255, 0)     // The yellow color for the center and background
-#define MINECRAFT_BROWN  RGB_(139, 69, 19)     // The brown color for the outer border
+#define MINECRAFT_SKY_1   RGB_(81, 89, 219)
+#define MINECRAFT_SKY_2   RGB_(64, 71, 174)
+#define MINECRAFT_SUN_1   RGB_(248, 255, 0)
+#define MINECRAFT_SUN_2   RGB_(198, 211, 0)
+#define MINECRAFT_NIGHT_1 RGB_(30, 28, 28)
+#define MINECRAFT_NIGHT_2 RGB_(24, 22, 22)
+#define MINECRAFT_MOON_1  RGB_(110, 105, 138)
+#define MINECRAFT_MOON_2  RGB_(88, 84, 110)
 
 /*****************************************************************************
 * Function    : draw_clock_face
@@ -54,16 +59,7 @@ void draw_clock_face(uint16_t *imageBuffer, float angle) {
     
     // Define the size of each "pixel" block
     // This creates the chunky Minecraft aesthetic
-    uint16_t pixelSize = 8;  // Each game "pixel" is 8x8 real pixels
-    
-    // Step 3: Draw the outer brown circle border
-    // This creates the frame for our clock
-    // Radius of 80 gives us a good size for the 240x240 display
-    Paint_DrawCircle(centerX, centerY, 80, MINECRAFT_BROWN, DOT_PIXEL_1X1, DRAW_FILL_FULL);
-    
-    // Step 4: Draw the yellow background circle
-    // Slightly smaller than the brown border
-    Paint_DrawCircle(centerX, centerY, 70, MINECRAFT_YELLOW, DOT_PIXEL_1X1, DRAW_FILL_FULL);
+    uint16_t pixelSize = 24;  // Each game "pixel" is 8x8 real pixels
     
     // Step 5: Pre-calculate sine and cosine values
     // This optimization prevents recalculating for each pixel
@@ -71,46 +67,41 @@ void draw_clock_face(uint16_t *imageBuffer, float angle) {
     float sin_angle = sin(angle);  // Sine of our rotation angle
     
     // Step 6: Draw the rotating blue arc segments
-    // Iterate through a 13x13 grid (-6 to 6 in both dimensions)
+    // Step 6: Draw the rotating circle with two halves
     for(int x = -6; x <= 6; x++) {
         for(int y = -6; y <= 6; y++) {
-            // Check if this point falls within our arc shape
-            // Using the equation of a ring: r1² ≤ x² + y² ≤ r2²
-            if(x*x + y*y <= 36 && x*x + y*y >= 16) {
-                // Apply rotation transformation to this point
-                // [x'] = [cos θ  -sin θ] [x]
-                // [y'] = [sin θ   cos θ] [y]
+            // Simplified circle equation
+            if(x*x + y*y <= 36) {  // Radius of 6 units
+                // Apply rotation transformation
                 float rotated_x = x * cos_angle - y * sin_angle;
-                float rotated_y = x * sin_angle + y * cos_angle;
                 
-                // Only draw pixels that fall in the correct quadrants
-                // This creates our two-arc pattern
-                if ((rotated_x < 0 && rotated_y < 0) || (rotated_x > 0 && rotated_y > 0)) {
-                    // Draw a rectangle representing one game "pixel"
-                    Paint_DrawRectangle(
-                        centerX + x * pixelSize,          // Left edge
-                        centerY + y * pixelSize,          // Top edge
-                        centerX + (x+1) * pixelSize - 1,  // Right edge
-                        centerY + (y+1) * pixelSize - 1,  // Bottom edge
-                        MINECRAFT_BLUE,                   // Blue color
-                        DOT_PIXEL_1X1,                   // 1 pixel line width
-                        DRAW_FILL_FULL                   // Solid fill
-                    );
-                }
+                // Choose color based on position
+                // If rotated_x is positive, use blue; if negative, use black
+                uint16_t color = (rotated_x > 0) ? MINECRAFT_SKY_1 : MINECRAFT_NIGHT_1;
+                
+                Paint_DrawRectangle(
+                    centerX + x * pixelSize,
+                    centerY + y * pixelSize,
+                    centerX + (x+1) * pixelSize,
+                    centerY + (y+1) * pixelSize,
+                    color,
+                    DOT_PIXEL_1X1,
+                    DRAW_FILL_FULL
+                );
             }
         }
     }
     
-    // Step 7: Draw the center yellow pixels
-    // This is a 3x3 grid of pixels that doesn't rotate
-    for(int x = -1; x <= 1; x++) {
-        for(int y = -1; y <= 1; y++) {
+    // Step 7: Draw the center pixels (2x2)
+    int offset = -pixelSize;  // Offset by one pixel to center
+    for(int x = 0; x < 2; x++) {
+        for(int y = 0; y < 2; y++) {
             Paint_DrawRectangle(
-                centerX + x * pixelSize,
-                centerY + y * pixelSize,
-                centerX + (x+1) * pixelSize - 1,
-                centerY + (y+1) * pixelSize - 1,
-                MINECRAFT_YELLOW,
+                centerX + offset + (x * pixelSize),
+                centerY + offset + (y * pixelSize),
+                centerX + offset + ((x+1) * pixelSize),
+                centerY + offset + ((y+1) * pixelSize),
+                MINECRAFT_MOON_1,
                 DOT_PIXEL_1X1,
                 DRAW_FILL_FULL
             );
