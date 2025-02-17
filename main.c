@@ -1,62 +1,53 @@
 ﻿#include "LCD_Test.h"
-#include "DEV_Config.h"
-#include "GUI_Paint.h"
-#include "fonts.h"
-#include <stdlib.h>
+#include "LCD_1in28.h"
+#include <stdio.h>
 #include "pico/stdlib.h"
 
-void setup() {
-    // Initialize the display configuration
-    if(DEV_Module_Init() != 0) {
-        return;
+int main(void)
+{
+    // Initialize the DEV Module
+    if (DEV_Module_Init() != 0) {
+        return -1;
     }
     
-    // Initialize LCD configuration
-    LCD_Init();
-    LCD_Clear(BLACK);
-    DEV_Delay_ms(100);
+    printf("LCD 1.28 Hello World Demo\r\n");
     
-    // Create a new image cache
-    UDOUBLE Imagesize = LCD_HEIGHT*LCD_WIDTH*2;
-    UWORD *BlackImage = (UWORD *)malloc(Imagesize);
+    // Initialize LCD and clear with white background
+    LCD_1IN28_Init(HORIZONTAL);
+    LCD_1IN28_Clear(WHITE);
     
-    // Create a new painting
-    Paint_NewImage(BlackImage, LCD_WIDTH, LCD_HEIGHT, 0, WHITE);
-    Paint_Clear(BLACK);
+    // Set backlight to 100%
+    DEV_SET_PWM(100);
+    
+    // Create image buffer
+    uint32_t imageSize = LCD_1IN28_HEIGHT * LCD_1IN28_WIDTH * 2;
+    uint16_t *imageBuffer = (uint16_t *)malloc(imageSize);
+    if (imageBuffer == NULL) {
+        printf("Failed to allocate memory\r\n");
+        return -1;
+    }
+    
+    // Initialize the image and set it to white
+    Paint_NewImage((uint8_t *)imageBuffer, LCD_1IN28.WIDTH, LCD_1IN28.HEIGHT, 0, WHITE);
+    Paint_SetScale(65);
+    Paint_Clear(WHITE);
     Paint_SetRotate(ROTATE_0);
     
-    // Set font style and size
-    Paint_SetScale(2);
-    
-    // Draw the text
+    // Draw Hello World text
     Paint_DrawString_EN(40, 100, "Hello World!", &Font20, BLACK, WHITE);
     
-    // Display the image and update screen
-    LCD_Display(BlackImage);
+    // Display the image
+    LCD_1IN28_Display(imageBuffer);
     
-    // Free the image cache
-    free(BlackImage);
-}
-
-void loop() {
-    // Main loop can be empty for this example
-    // or you can add animations/updates here
-    sleep_ms(1000);
-}
-
-int main() {
-    // Initialize stdio
-    stdio_init_all();
+    // Free the image buffer
+    free(imageBuffer);
     
-    // Run setup
-    setup();
-    
-    // Main program loop
-    while(1) {
-        loop();
+    // Keep program running
+    while (1) {
+        DEV_Delay_ms(100);
     }
     
-    // Clean up (this won't be reached in this example)
+    // Clean up
     DEV_Module_Exit();
     return 0;
 }
