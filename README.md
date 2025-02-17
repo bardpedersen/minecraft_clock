@@ -1,6 +1,10 @@
 
 # Minecraft Clock
 
+## To Do
+
+Delete unnecessary files.
+
 ## Installation
 
 ### Picotool
