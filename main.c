@@ -13,7 +13,8 @@
 #include "LCD_Test.h"      // Contains core LCD testing utilities
 #include "LCD_1in28.h"     // Specific header for our 1.28 inch LCD display
 #include "pico/stdlib.h"   // Core Raspberry Pi Pico functionality
-#include "time_one.h"
+#include "time_header.h"
+
 /*****************************************************************************
 * Function    : draw_clock_face
 * Description : Draws a single frame of the clock at a specified rotation angle
@@ -34,7 +35,13 @@ void draw_clock_face(uint16_t *imageBuffer, float angle) {
     uint16_t color;
     for (int x = -5; x < 6; x++) {
         for (int y = -5; y < 6; y++) {
-            color = time_one_pixel_color(x, y);
+            if (angle < M_PI) {
+                color = time_1_pixel_color(x, y);
+            } else if (angle < 2 * M_PI) {
+                color = time_64_pixel_color(x, y);
+            } else {
+                color = time_1_pixel_color(x, y);
+            }
             Paint_DrawRectangle(centerX + x * pixelSize, centerY + y * pixelSize, centerX + (x+1) * pixelSize, centerY + (y+1) * pixelSize, color, DOT_PIXEL_1X1, DRAW_FILL_FULL);
         }
     }
@@ -64,7 +71,7 @@ int main(void) {
     LCD_1IN28_Clear(WHITE);
     
     // Set the backlight to maximum brightness
-    DEV_SET_PWM(65);
+    DEV_SET_PWM(100);
 
     uint32_t imageSize = LCD_1IN28_HEIGHT * LCD_1IN28_WIDTH * 2;
     uint16_t *imageBuffer = (uint16_t *)malloc(imageSize);
@@ -83,7 +90,7 @@ int main(void) {
         angle -= rotation_speed * elapsed;
         
         // Keep angle between 0 and 2π
-        if (angle >= 2 * M_PI) {
+        if (angle <= 0) {
             angle += 2 * M_PI;
         }
         
