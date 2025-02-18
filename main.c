@@ -8,26 +8,12 @@
 ******************************************************************************/
 
 // Include all necessary header files for our project
+#include <stdio.h>         // Standard input/output operations
+#include <math.h>          // Mathematical functions for rotation calculations
 #include "LCD_Test.h"      // Contains core LCD testing utilities
 #include "LCD_1in28.h"     // Specific header for our 1.28 inch LCD display
-#include <stdio.h>         // Standard input/output operations
 #include "pico/stdlib.h"   // Core Raspberry Pi Pico functionality
-#include <math.h>          // Mathematical functions for rotation calculations
-
-// Define our custom colors to match Minecraft's aesthetic
-// RGB macro creates 16-bit color values from RGB components
-// RGB565 color conversion macro
-#define RGB_(r, g, b) ((((r) & 0xF8) << 8) | (((g) & 0xFC) << 3) | ((b) >> 3))
-
-#define MINECRAFT_SKY_1   RGB_(64, 71, 174)
-#define MINECRAFT_SKY_2   RGB_(81, 89, 219)
-#define MINECRAFT_SUN_1   RGB_(248, 255, 0)
-#define MINECRAFT_SUN_2   RGB_(198, 211, 0)
-#define MINECRAFT_NIGHT_1 RGB_(30, 28, 28)
-#define MINECRAFT_NIGHT_2 RGB_(24, 22, 22)
-#define MINECRAFT_MOON_1  RGB_(110, 105, 138)
-#define MINECRAFT_MOON_2  RGB_(88, 84, 110)
-
+#include "time_one.h"
 /*****************************************************************************
 * Function    : draw_clock_face
 * Description : Draws a single frame of the clock at a specified rotation angle
@@ -35,12 +21,11 @@
 *               angle - Current rotation angle in radians
 * Note        : This function completely redraws the clock face each frame
 ******************************************************************************/
-void draw_clock_face_one(uint16_t *imageBuffer) {
+void draw_clock_face(uint16_t *imageBuffer, float angle) {
     Paint_NewImage((uint8_t *)imageBuffer, LCD_1IN28.WIDTH, LCD_1IN28.HEIGHT, 0, WHITE);
     Paint_SetScale(65);
     Paint_Clear(BLACK);
     Paint_SetRotate(ROTATE_0);
-    
 
     uint16_t centerX = LCD_1IN28.WIDTH / 2;
     uint16_t centerY = LCD_1IN28.HEIGHT / 2; 
@@ -49,153 +34,7 @@ void draw_clock_face_one(uint16_t *imageBuffer) {
     uint16_t color;
     for (int x = -5; x < 6; x++) {
         for (int y = -5; y < 6; y++) {
-            if (x == -5 && y == -1) {
-                color = MINECRAFT_SKY_1;
-            }
-            else if (x == -5 && y == 0) {
-                color = MINECRAFT_SKY_1;
-            }
-            else if (x == -4 && y == -3) {
-                color = MINECRAFT_SKY_1;
-            }
-            else if (x == -4 && y == -2) {
-                color = MINECRAFT_SKY_1;
-            }
-            else if (x == -4 && y == -1) {
-                color = MINECRAFT_SKY_1;
-            }
-            else if (x == -4 && y == 0) {
-                color = MINECRAFT_SKY_1;
-            }
-            else if (x == -4 && y == 1) {
-                color = MINECRAFT_NIGHT_1;
-            }
-            else if (x == -3 && y == -4) {
-                color = MINECRAFT_SKY_1;
-            }
-            else if (x == -3 && y == -3) {
-                color = MINECRAFT_SKY_1;
-            }
-            else if (x == -3 && y == -2) {
-                color = MINECRAFT_SKY_2;
-            }
-            else if (x == -3 && y == -1) {
-                color = MINECRAFT_SKY_2;
-            }
-            else if (x == -3 && y == 0) {
-                color = MINECRAFT_SKY_2;
-            }
-            else if (x == -3 && y == 1) {
-                color = MINECRAFT_NIGHT_1;
-            }
-            else if (x == -2 && y == -4) {
-                color = MINECRAFT_SKY_1;
-            }
-            else if (x == -2 && y == -3) {
-                color = MINECRAFT_SUN_1;
-            }
-            else if (x == -2 && y == -2) {
-                color = MINECRAFT_SUN_1;
-            }
-            else if (x == -2 && y == -1) {
-                color = MINECRAFT_SKY_2;
-            }
-            else if (x == -2 && y == 0) {
-                color = MINECRAFT_SKY_2;
-            }
-            else if (x == -2 && y == 1) {
-                color = MINECRAFT_NIGHT_1;
-            }
-            else if (x == -1 && y == -5) {
-                color = MINECRAFT_SKY_1;
-            }
-            else if (x == -1 && y == -4) {
-                color = MINECRAFT_SUN_2;
-            }
-            else if (x == -1 && y == -3) {
-                color = MINECRAFT_SUN_1;
-            }
-            else if (x == -1 && y == -2) {
-                color = MINECRAFT_SUN_1;
-            }
-            else if (x == -1 && y == -1) {
-                color = MINECRAFT_SUN_1;
-            }
-            else if (x == 0 && y == -5) {
-                color = MINECRAFT_SKY_1;
-            }
-            else if (x == 0 && y == -4) {
-                color = MINECRAFT_SUN_2;
-            }
-            else if (x == 0 && y == -3) {
-                color = MINECRAFT_SUN_1;
-            }
-            else if (x == 0 && y == -2) {
-                color = MINECRAFT_SUN_1;
-            }
-            else if (x == 0 && y == -1) {
-                color = MINECRAFT_SUN_1;
-            }
-            else if (x == 1 && y == -4) {
-                color = MINECRAFT_SKY_1;
-            }
-            else if (x == 1 && y == -3) {
-                color = MINECRAFT_SUN_1;
-            }
-            else if (x == 1 && y == -2) {
-                color = MINECRAFT_SUN_1;
-            }
-            else if (x == 1 && y == -1) {
-                color = MINECRAFT_SKY_2;
-            }
-            else if (x == 1 && y == 0) {
-                color = MINECRAFT_SKY_1;
-            }
-            else if (x == 1 && y == 1) {
-                color = MINECRAFT_NIGHT_1;
-            }
-            else if (x == 2 && y == -4) {
-                color = MINECRAFT_SKY_1;
-            }
-            else if (x == 2 && y == -3) {
-                color = MINECRAFT_SKY_2;
-            }
-            else if (x == 2 && y == -2) {
-                color = MINECRAFT_SKY_2;
-            }
-            else if (x == 2 && y == -1) {
-                color = MINECRAFT_SKY_2;
-            }
-            else if (x == 2 && y == 0) {
-                color = MINECRAFT_SKY_2;
-            }
-            else if (x == 2 && y == 1) {
-                color = MINECRAFT_NIGHT_1;
-            }
-            else if (x == 3 && y == -3) {
-                color = MINECRAFT_SKY_1;
-            }
-            else if (x == 3 && y == -2) {
-                color = MINECRAFT_SKY_2;
-            }
-            else if (x == 3 && y == -1) {
-                color = MINECRAFT_SKY_2;
-            }
-            else if (x == 3 && y == 0) {
-                color = MINECRAFT_SKY_2;
-            }
-            else if (x == 3 && y == 1) {
-                color = MINECRAFT_NIGHT_1;
-            }
-            else if (x == 4 && y == -1) {
-                color = MINECRAFT_SKY_1;
-            }
-            else if (x == 4 && y == 0) {
-                color = MINECRAFT_SKY_1;
-            }
-            else {
-                color = BLACK;
-            }
+            color = time_one_pixel_color(x, y);
             Paint_DrawRectangle(centerX + x * pixelSize, centerY + y * pixelSize, centerX + (x+1) * pixelSize, centerY + (y+1) * pixelSize, color, DOT_PIXEL_1X1, DRAW_FILL_FULL);
         }
     }
@@ -249,7 +88,7 @@ int main(void) {
         }
         
         // Draw the clock face at current rotation angle
-        draw_clock_face_one(imageBuffer);
+        draw_clock_face(imageBuffer, angle);
         LCD_1IN28_Display(imageBuffer);
         last_time = current_time;
 
