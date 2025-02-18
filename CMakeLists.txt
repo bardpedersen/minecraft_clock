@@ -10,84 +10,24 @@ add_subdirectory(./lib/LCD)
 add_subdirectory(./lib/Fonts)
 add_subdirectory(./lib/GUI)
 add_subdirectory(./lib/QMI8658)
-add_subdirectory(./examples)
+add_subdirectory(./lib/examples)
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/time_faces/header)
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/time_faces/src)
-include_directories(./examples)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src/include)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src/src)
+include_directories(./lib/examples)
 include_directories(./lib/Config)
 include_directories(./lib/Fonts)
 include_directories(./lib/GUI)
 include_directories(./lib/LCD)
 include_directories(./lib/QMI8658)
 
+# Collect all time_faces source files
+file(GLOB TIME_FACES_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/src/time_*.c)
+
 add_executable(minecraft_clock 
-main.c
-time_faces/src/time_1.c
-time_faces/src/time_2.c
-time_faces/src/time_3.c
-time_faces/src/time_4.c
-time_faces/src/time_5.c
-time_faces/src/time_6.c
-time_faces/src/time_7.c
-time_faces/src/time_8.c
-time_faces/src/time_9.c
-time_faces/src/time_10.c
-time_faces/src/time_11.c
-time_faces/src/time_12.c
-time_faces/src/time_13.c
-time_faces/src/time_14.c
-time_faces/src/time_15.c
-time_faces/src/time_16.c
-time_faces/src/time_17.c
-time_faces/src/time_18.c
-time_faces/src/time_19.c
-time_faces/src/time_20.c
-time_faces/src/time_21.c
-time_faces/src/time_22.c
-time_faces/src/time_23.c
-time_faces/src/time_24.c
-time_faces/src/time_25.c
-time_faces/src/time_26.c
-time_faces/src/time_27.c
-time_faces/src/time_28.c
-time_faces/src/time_29.c
-time_faces/src/time_30.c
-time_faces/src/time_31.c
-time_faces/src/time_32.c
-time_faces/src/time_33.c
-time_faces/src/time_34.c
-time_faces/src/time_35.c
-time_faces/src/time_36.c
-time_faces/src/time_37.c
-time_faces/src/time_38.c
-time_faces/src/time_39.c
-time_faces/src/time_40.c
-time_faces/src/time_41.c
-time_faces/src/time_42.c
-time_faces/src/time_43.c
-time_faces/src/time_44.c
-time_faces/src/time_45.c
-time_faces/src/time_46.c
-time_faces/src/time_47.c
-time_faces/src/time_48.c
-time_faces/src/time_49.c
-time_faces/src/time_50.c
-time_faces/src/time_51.c
-time_faces/src/time_52.c
-time_faces/src/time_53.c
-time_faces/src/time_54.c
-time_faces/src/time_55.c
-time_faces/src/time_56.c
-time_faces/src/time_57.c
-time_faces/src/time_58.c
-time_faces/src/time_59.c
-time_faces/src/time_60.c
-time_faces/src/time_61.c
-time_faces/src/time_62.c
-time_faces/src/time_63.c
-time_faces/src/time_64.c
+    main.c
+    ${TIME_FACES_SOURCES}
 )
 
 # enable usb output, disable uart output

@@ -1,27 +1,29 @@
-/*****************************************************************************
-* File        : minecraft_clock_rotating.c
-* Author      : Based on Waveshare examples
-* Description : Animated Minecraft clock display for RP2040-LCD-1.28
-* Details     : Creates a rotating clock face that mimics the Minecraft day/night
-*               cycle clock item. The clock face consists of blue arcs that rotate
-*               around a yellow center on a brown background.
-******************************************************************************/
-
-// Include all necessary header files for our project
-#include <stdio.h>         // Standard input/output operations
-#include <math.h>          // Mathematical functions for rotation calculations
-#include "LCD_Test.h"      // Contains core LCD testing utilities
-#include "LCD_1in28.h"     // Specific header for our 1.28 inch LCD display
-#include "pico/stdlib.h"   // Core Raspberry Pi Pico functionality
+#include <stdio.h>
+#include <math.h>
+#include "LCD_Test.h"
+#include "LCD_1in28.h"
+#include "pico/stdlib.h"
 #include "time_header.h"
 
-/*****************************************************************************
-* Function    : draw_clock_face
-* Description : Draws a single frame of the clock at a specified rotation angle
-* Parameters  : imageBuffer - Pointer to the display buffer
-*               angle - Current rotation angle in radians
-* Note        : This function completely redraws the clock face each frame
-******************************************************************************/
+uint16_t (*color_functions[64])(int, int) = {
+    time_1_pixel_color, time_2_pixel_color, time_3_pixel_color, time_4_pixel_color,
+    time_5_pixel_color, time_6_pixel_color, time_7_pixel_color, time_8_pixel_color,
+    time_9_pixel_color, time_10_pixel_color, time_11_pixel_color, time_12_pixel_color,
+    time_13_pixel_color, time_14_pixel_color, time_15_pixel_color, time_16_pixel_color,
+    time_17_pixel_color, time_18_pixel_color, time_19_pixel_color, time_20_pixel_color,
+    time_21_pixel_color, time_22_pixel_color, time_23_pixel_color, time_24_pixel_color,
+    time_25_pixel_color, time_26_pixel_color, time_27_pixel_color, time_28_pixel_color,
+    time_29_pixel_color, time_30_pixel_color, time_31_pixel_color, time_32_pixel_color,
+    time_33_pixel_color, time_34_pixel_color, time_35_pixel_color, time_36_pixel_color,
+    time_37_pixel_color, time_38_pixel_color, time_39_pixel_color, time_40_pixel_color,
+    time_41_pixel_color, time_42_pixel_color, time_43_pixel_color, time_44_pixel_color,
+    time_45_pixel_color, time_46_pixel_color, time_47_pixel_color, time_48_pixel_color,
+    time_49_pixel_color, time_50_pixel_color, time_51_pixel_color, time_52_pixel_color,
+    time_53_pixel_color, time_54_pixel_color, time_55_pixel_color, time_56_pixel_color,
+    time_57_pixel_color, time_58_pixel_color, time_59_pixel_color, time_60_pixel_color,
+    time_61_pixel_color, time_62_pixel_color, time_63_pixel_color, time_64_pixel_color
+};
+
 void draw_clock_face(uint16_t *imageBuffer, float angle) {
     Paint_NewImage((uint8_t *)imageBuffer, LCD_1IN28.WIDTH, LCD_1IN28.HEIGHT, 0, WHITE);
     Paint_SetScale(65);
@@ -35,38 +37,22 @@ void draw_clock_face(uint16_t *imageBuffer, float angle) {
     uint16_t color;
     for (int x = -5; x < 6; x++) {
         for (int y = -5; y < 6; y++) {
-            if (angle < M_PI) {
-                color = time_1_pixel_color(x, y);
-            } else if (angle < 2 * M_PI) {
-                color = time_64_pixel_color(x, y);
-            } else {
-                color = time_1_pixel_color(x, y);
-            }
+            int index = (int)(angle / (2 * M_PI) * 64) % 64;
+            color = color_functions[index](x, y);
             Paint_DrawRectangle(centerX + x * pixelSize, centerY + y * pixelSize, centerX + (x+1) * pixelSize, centerY + (y+1) * pixelSize, color, DOT_PIXEL_1X1, DRAW_FILL_FULL);
         }
     }
 
 }
 
-
-/*****************************************************************************
-* Function    : main
-* Description : Main program entry point and animation loop
-* Returns     : 0 on success, -1 on failure
-******************************************************************************/
 int main(void) {
-    // Step 1: Initialize system components
-    // Set up standard input/output
     stdio_init_all();
     
-    // Initialize the display module and check for errors
     if (DEV_Module_Init() != 0) {
         printf("ERROR: Device initialization failed!\r\n");
         return -1;
     }
     
-    // Step 2: Initialize the LCD display
-    // Set horizontal orientation and clear to white
     LCD_1IN28_Init(HORIZONTAL);
     LCD_1IN28_Clear(WHITE);
     
@@ -75,37 +61,28 @@ int main(void) {
 
     uint32_t imageSize = LCD_1IN28_HEIGHT * LCD_1IN28_WIDTH * 2;
     uint16_t *imageBuffer = (uint16_t *)malloc(imageSize);
-    
 
     float angle = 0.0f;
-    const float rotation_speed = 2 * M_PI / 24.0f;
+    const float rotation_speed = 2 * M_PI / 2.0f;
     uint32_t last_time = time_us_32();
     
     while (1) {
-        // Get current time in microseconds
-        uint32_t current_time = time_us_32();
-        
-        // Calculate elapsed time in seconds since last frame
+        uint32_t current_time = time_us_32();        
         float elapsed = (current_time - last_time) / 1000000.0f;
-        angle -= rotation_speed * elapsed;
+        angle += rotation_speed * elapsed;
         
-        // Keep angle between 0 and 2π
-        if (angle <= 0) {
-            angle += 2 * M_PI;
+        if (angle >= 2 * M_PI) {
+            angle = 0.0f;
         }
         
-        // Draw the clock face at current rotation angle
         draw_clock_face(imageBuffer, angle);
         LCD_1IN28_Display(imageBuffer);
         last_time = current_time;
 
-        DEV_Delay_ms(20);  // 20ms = ~50 FPS
+        sleep_ms(10);
     }
-    
-    // Step 6: Cleanup
-    // Note: This code is never reached due to infinite loop
-    // But it's good practice to include cleanup code
-    free(imageBuffer);      // Free allocated memory
-    DEV_Module_Exit();      // Clean up device module
-    return 0;               // Return success
+
+    free(imageBuffer);
+    DEV_Module_Exit();
+    return 0;
 }
