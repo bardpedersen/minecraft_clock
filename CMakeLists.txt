@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.12)
-include(pico_sdk_import.cmake)
+include(./lib/pico_sdk_import.cmake)
 
 project(minecraft_clock C CXX ASM)
 
