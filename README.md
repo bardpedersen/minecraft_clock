@@ -11,7 +11,7 @@ A physical, wearable replica of the Minecraft clock powered by a Raspberry Pi Pi
 
 - Accurate representation of Minecraft's in-game clock
 - Low power consumption (~34mA)
-- One pixel is 3.251mm x 3.251mm
+- One minecraft pixel is 3.251mm x 3.251mm
 - Wearable design with 3D printed case and watch band
 - Full day/night cycle animation
 - Powered by [Waveshare 1.28" round LCD display](https://www.waveshare.com/wiki/RP2040-LCD-1.28#Datasheet)
