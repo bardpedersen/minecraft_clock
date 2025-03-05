@@ -66,7 +66,7 @@ int main(void) {
     LCD_1IN28_Clear(WHITE);  // Clear the display with white color
     
     // Set the backlight to maximum brightness
-    DEV_SET_PWM(100);
+    DEV_SET_PWM(10);
 
     // Calculate the size of the image buffer
     uint32_t imageSize = LCD_1IN28_HEIGHT * LCD_1IN28_WIDTH * 2;
